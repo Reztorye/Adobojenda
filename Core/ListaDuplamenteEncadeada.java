@@ -1,7 +1,15 @@
 package Core;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeSet;
 
 public class ListaDuplamenteEncadeada {
     private No cabeca;
@@ -71,6 +79,18 @@ public class ListaDuplamenteEncadeada {
         }
         return false;
     }
+    
+    public Compromisso findCompromissoById(int id) {
+        No atual = cabeca;
+        while (atual != null) {
+            if (atual.getCompromisso().getId() == id) {
+                return atual.getCompromisso();
+            }
+            atual = atual.getProximo();
+        }
+        return null;
+    }
+
 
     public Stack<Compromisso> criarPilhaExecutados() {
         Stack<Compromisso> pilha = new Stack<>();
@@ -184,5 +204,15 @@ public class ListaDuplamenteEncadeada {
             this.proximo = null;
             this.anterior = null;
         }
+
+		public No getProximo() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public Compromisso getCompromisso() {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 }

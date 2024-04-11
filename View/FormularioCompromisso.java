@@ -15,6 +15,7 @@ public class FormularioCompromisso extends JDialog {
     private PlaceholderTextField campoNomeCliente, campoTelefone, campoData, campoHora;
     private JTextArea areaDescricao;
     private JButton botaoSalvar, botaoCancelar;
+    private JScrollPane scrollDescricao;
     private ListaDuplamenteEncadeada listaCompromissos;
     private TelaPrincipal telaPrincipal;
 
@@ -23,76 +24,83 @@ public class FormularioCompromisso extends JDialog {
         this.listaCompromissos = listaCompromissos;
         this.telaPrincipal = telaPrincipal;
         setSize(700, 400);
-        setLayout(new GridLayout(6, 2));
+        setLayout(null); 
 
-        campoNomeCliente = new PlaceholderTextField("Digite o nome do cliente");
-        campoTelefone = new PlaceholderTextField("Digite o telefone");
-        campoData = new PlaceholderTextField("Digite a data (dd/mm/aaaa)");
-        campoHora = new PlaceholderTextField("Digite a hora (HH:mm)");
-        areaDescricao = new JTextArea(5, 20); 
+        campoNomeCliente = new PlaceholderTextField("Nome Completo");
+        campoTelefone = new PlaceholderTextField("(XX) 99999-9999");
+        campoData = new PlaceholderTextField("aaaa-mm-dd");
+        campoHora = new PlaceholderTextField("HH:mm");
+        areaDescricao = new JTextArea(5, 20);
+        scrollDescricao = new JScrollPane(areaDescricao);  
 
         botaoSalvar = new JButton("Salvar");
         botaoCancelar = new JButton("Cancelar");
 
-        add(new JLabel("Nome do Cliente:"));
+        campoNomeCliente.setBounds(150, 20, 200, 25);
+        campoTelefone.setBounds(150, 60, 200, 25);
+        campoData.setBounds(150, 100, 200, 25);
+        campoHora.setBounds(150, 140, 200, 25);
+        scrollDescricao.setBounds(150, 180, 200, 75);
+
+        botaoSalvar.setBounds(150, 270, 95, 30);
+        botaoCancelar.setBounds(255, 270, 95, 30);
+
+        add(new JLabel("Nome do Cliente:")).setBounds(20, 20, 120, 25);
         add(campoNomeCliente);
-        add(new JLabel("Telefone:"));
+        add(new JLabel("Telefone:")).setBounds(20, 60, 120, 25);
         add(campoTelefone);
-        add(new JLabel("Data:"));
+        add(new JLabel("Data:")).setBounds(20, 100, 120, 25);
         add(campoData);
-        add(new JLabel("Hora:"));
+        add(new JLabel("Hora:")).setBounds(20, 140, 120, 25);
         add(campoHora);
-        add(new JLabel("Descrição:"));
-        add(new JScrollPane(areaDescricao));
+        add(new JLabel("Descrição:")).setBounds(20, 180, 120, 25);
+        add(scrollDescricao);  
 
+        add(botaoSalvar);
+        add(botaoCancelar);
 
+        botaoCancelar.addActionListener(e -> {
+            setVisible(false);
+            dispose();
+        });
 
-        getContentPane().add(botaoSalvar);
-        getContentPane().add(botaoCancelar);
+        botaoSalvar.addActionListener(e -> {
+            try {
+                String nomeCliente = campoNomeCliente.getText();
+                String telefone = campoTelefone.getText();
+                String dataString = campoData.getText();
+                String horaString = campoHora.getText();
+                String descricao = areaDescricao.getText();
 
-        botaoCancelar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+                if(nomeCliente.isEmpty() || telefone.isEmpty() || dataString.isEmpty() || horaString.isEmpty() || descricao.isEmpty()) {
+                    JOptionPane.showMessageDialog(FormularioCompromisso.this, "Todos os campos devem ser preenchidos.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return; 
+                }
+
+                LocalDate data = LocalDate.parse(dataString);
+                LocalTime hora = LocalTime.parse(horaString);
+
+                Compromisso novoCompromisso = new Compromisso(nomeCliente, telefone, data, hora, descricao);
+
+                listaCompromissos.inserir(novoCompromisso);
+
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        telaPrincipal.atualizarListaCompromissos();
+                    }
+                });
+
                 setVisible(false);
                 dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(FormularioCompromisso.this, "Erro ao salvar o compromisso. Verifique os dados e tente novamente.\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
-
-        botaoSalvar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String nomeCliente = campoNomeCliente.getText();
-                    String telefone = campoTelefone.getText();
-                    String dataString = campoData.getText();
-                    String horaString = campoHora.getText();
-                    String descricao = areaDescricao.getText();
-
-                    if(nomeCliente.isEmpty() || telefone.isEmpty() || dataString.isEmpty() || horaString.isEmpty() || descricao.isEmpty()) {
-                        JOptionPane.showMessageDialog(FormularioCompromisso.this, "Todos os campos devem ser preenchidos.", "Erro", JOptionPane.ERROR_MESSAGE);
-                        return; 
-                    }
-
-                    LocalDate data = LocalDate.parse(dataString);
-                    LocalTime hora = LocalTime.parse(horaString);
-
-                    Compromisso novoCompromisso = new Compromisso(nomeCliente, telefone, data, hora, descricao);
-
-                    listaCompromissos.inserir(novoCompromisso);
-                    
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            telaPrincipal.atualizarListaCompromissos();
-                        }
-                    });
-
-                    setVisible(false);
-                    dispose();
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(FormularioCompromisso.this, "Erro ao salvar o compromisso. Verifique os dados e tente novamente.\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-	
 
         setLocationRelativeTo(parent);
     }
 }
+
+    
+    
+

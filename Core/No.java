@@ -10,4 +10,16 @@ public class No {
         this.proximo = null;
         this.anterior = null;
     }
+    
+    public Compromisso getCompromisso() {
+        return compromisso;
+    }
+
+    public No getProximo() {
+        return proximo;
+    }
+
+    public No getAnterior() {
+        return anterior;
+    }
 }

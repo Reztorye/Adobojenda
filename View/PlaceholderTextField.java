@@ -7,7 +7,11 @@ import javax.swing.JTextField;
 
 public class PlaceholderTextField extends JTextField {
     
-    private final String placeholder;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6104469763680156211L;
+	private final String placeholder;
     private boolean isPlaceholder;
 
     public PlaceholderTextField(String placeholder) {
@@ -39,6 +43,10 @@ public class PlaceholderTextField extends JTextField {
 
     @Override
     public String getText() {
-        return isPlaceholder ? "" : super.getText();  // Retorna texto vazio se for placeholder
+        return isPlaceholder ? "" : super.getText();  
     }
+
+	public String getPlaceholder() {
+		return placeholder;
+	}
 }
