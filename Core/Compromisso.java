@@ -80,7 +80,6 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
         }
     }
 
-
     public void setExecutado(boolean executado) {
         this.executado = executado;
     }
@@ -106,4 +105,6 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
         return comparacaoData;
     }
     
+
+
 }

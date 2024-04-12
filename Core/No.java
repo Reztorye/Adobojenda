@@ -11,15 +11,17 @@ public class No {
         this.anterior = null;
     }
     
-    public Compromisso getCompromisso() {
-        return compromisso;
-    }
-
     public No getProximo() {
         return proximo;
+    }
+
+    public Compromisso getCompromisso() {
+        return compromisso;
     }
 
     public No getAnterior() {
         return anterior;
     }
+    
+    
 }

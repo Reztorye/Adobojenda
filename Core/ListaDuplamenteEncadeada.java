@@ -83,14 +83,13 @@ public class ListaDuplamenteEncadeada {
     public Compromisso findCompromissoById(int id) {
         No atual = cabeca;
         while (atual != null) {
-            if (atual.getCompromisso().getId() == id) {
+            if (atual.getCompromisso() != null && atual.getCompromisso().getId() == id) {
                 return atual.getCompromisso();
             }
             atual = atual.getProximo();
         }
         return null;
     }
-
 
     public Stack<Compromisso> criarPilhaExecutados() {
         Stack<Compromisso> pilha = new Stack<>();
@@ -177,6 +176,28 @@ public class ListaDuplamenteEncadeada {
             atual = atual.proximo;
         }
     }
+    
+    public void removerPeloId(int id) {
+        No atual = cabeca;
+        while (atual != null) {
+            if (atual.compromisso.getId() == id) {
+                if (atual.anterior != null) {
+                    atual.anterior.proximo = atual.proximo;
+                } else {
+                    cabeca = atual.proximo;  
+                }
+                if (atual.proximo != null) {
+                    atual.proximo.anterior = atual.anterior;
+                } else {
+                    cauda = atual.anterior;  
+                }
+                tamanho--;
+                return; 
+            }
+            atual = atual.proximo;
+        }
+    }
+
 
     public int getTamanho() {
         return tamanho;
@@ -194,25 +215,5 @@ public class ListaDuplamenteEncadeada {
         return todosCompromissos; 
     }
 
-    private class No {
-        Compromisso compromisso;
-        No proximo;
-        No anterior;
 
-        public No(Compromisso compromisso) {
-            this.compromisso = compromisso;
-            this.proximo = null;
-            this.anterior = null;
-        }
-
-		public No getProximo() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public Compromisso getCompromisso() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-    }
 }

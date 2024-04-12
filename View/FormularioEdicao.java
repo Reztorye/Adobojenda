@@ -9,7 +9,7 @@ import Core.ListaDuplamenteEncadeada;
 public class FormularioEdicao extends JDialog {
 
     private static final long serialVersionUID = 1L;
-    private PlaceholderTextField campoNomeCliente, campoTelefone, campoData, campoHora;
+    private JTextField campoNomeCliente, campoTelefone, campoData, campoHora;
     private JTextArea areaDescricao;
     private JButton botaoSalvar, botaoCancelar;
     private JScrollPane scrollDescricao;
@@ -26,10 +26,10 @@ public class FormularioEdicao extends JDialog {
         setSize(700, 400);
         setLayout(null);
 
-        campoNomeCliente = new PlaceholderTextField(compromisso.getNomeCliente());
-        campoTelefone = new PlaceholderTextField(compromisso.getTelefone());
-        campoData = new PlaceholderTextField(compromisso.getData().toString()); 
-        campoHora = new PlaceholderTextField(compromisso.getHora().toString()); 
+        campoNomeCliente = new JTextField(compromisso.getNomeCliente());
+        campoTelefone = new JTextField(compromisso.getTelefone());
+        campoData = new JTextField(compromisso.getData().toString()); 
+        campoHora = new JTextField(compromisso.getHora().toString()); 
         areaDescricao = new JTextArea(compromisso.getDescricao(), 5, 20);
         scrollDescricao = new JScrollPane(areaDescricao);
 
@@ -70,7 +70,6 @@ public class FormularioEdicao extends JDialog {
                 compromissoAtual.setTelefone(campoTelefone.getText());
                 compromissoAtual.setHora(LocalTime.parse(campoHora.getText())); 
                 compromissoAtual.setDescricao(areaDescricao.getText());
-
 
                 telaPrincipal.atualizarListaCompromissos();
 
