@@ -6,18 +6,20 @@ import java.time.LocalTime;
 import Core.Compromisso;
 import Core.ListaDuplamenteEncadeada;
 
-public class FormularioEdicao extends JDialog {
+public class FormularioEditar extends JDialog {
 
     private static final long serialVersionUID = 1L;
     private JTextField campoNomeCliente, campoTelefone, campoData, campoHora;
     private JTextArea areaDescricao;
     private JButton botaoSalvar, botaoCancelar;
     private JScrollPane scrollDescricao;
-    private ListaDuplamenteEncadeada listaCompromissos;
-    private TelaPrincipal telaPrincipal;
+    @SuppressWarnings("unused")
+	private ListaDuplamenteEncadeada listaCompromissos;
+    @SuppressWarnings("unused")
+	private TelaPrincipal telaPrincipal;
     private Compromisso compromissoAtual;
 
-    public FormularioEdicao(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal, Compromisso compromisso) {
+    public FormularioEditar(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal, Compromisso compromisso) {
         super(parent, "Editar Compromisso", true);
         this.listaCompromissos = listaCompromissos;
         this.telaPrincipal = telaPrincipal;

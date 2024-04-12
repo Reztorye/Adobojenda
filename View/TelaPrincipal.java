@@ -8,29 +8,27 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
+import com.toedter.calendar.JCalendar;
 
 import Core.Compromisso;
 import Core.ListaDuplamenteEncadeada;
@@ -48,18 +46,44 @@ public class TelaPrincipal extends JFrame {
         setSize(890, 498);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
-
-        JMenuBar menuBar = new JMenuBar();
         
+        JMenuBar menuBar = new JMenuBar();
+
         JMenu menuArquivo = new JMenu("Arquivo");
         JMenuItem menuItemSair = new JMenuItem("Sair");
         menuItemSair.addActionListener(e -> System.exit(0));
         menuArquivo.add(menuItemSair);
+        menuBar.add(menuArquivo);
+
+        JMenu menuTasks = new JMenu("Tarefas");
         
+        JMenuItem menuItemA = new JMenuItem("Item A");
+        menuItemA.addActionListener(e -> listaCompromissos.separarCompromissosExecutados());
+        menuTasks.add(menuItemA);
+        
+        JMenuItem menuItemB = new JMenuItem("Item B");
+        menuItemB.addActionListener(e -> listaCompromissos.apresentarDequeCompromissos());
+        menuTasks.add(menuItemB);
+        
+        JMenuItem menuItemC = new JMenuItem("Item C");
+        menuItemC.addActionListener(e ->  {
+            Set<Compromisso> listaTelefonica = listaCompromissos.criarListaTelefonica();
+            mostrarListaTelefonica(listaTelefonica);
+        });
+        menuTasks.add(menuItemC);
+        
+        JMenuItem menuItemD = new JMenuItem("Item D");
+        menuItemD.addActionListener(e -> abrirDialogoItemD());
+        menuTasks.add(menuItemD);
+        
+        menuBar.add(menuTasks);
+
+        setJMenuBar(menuBar);
+
         JMenu menuCompromissos = new JMenu("Compromissos");
         JMenuItem menuItemAdicionar = new JMenuItem("Adicionar");
         menuItemAdicionar.addActionListener(e -> {
-            FormularioCompromisso formulario = new FormularioCompromisso(this, listaCompromissos, this);
+            FormularioAdicionar formulario = new FormularioAdicionar(this, listaCompromissos, this);
             formulario.setVisible(true);
         });
         menuCompromissos.add(menuItemAdicionar);
@@ -72,7 +96,6 @@ public class TelaPrincipal extends JFrame {
         String[] colunas = {"ID", "Nome do Cliente", "Telefone", "Data", "Hora", "Descrição", "Executado"};
         modelo = new DefaultTableModel(colunas, 0) {
             private static final long serialVersionUID = 8100759408390693468L;
-            
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 if (columnIndex == 6) { 
@@ -86,15 +109,8 @@ public class TelaPrincipal extends JFrame {
                 return false; 
             }
         };
-       
-        tabelaCompromissos = new JTable(modelo);
-        
-        
-        
+        tabelaCompromissos = new JTable(modelo);     
         tabelaCompromissos.getColumnModel().getColumn(6).setCellRenderer(new DefaultTableCellRenderer() {
-            /**
-			 * 
-			 */
 			private static final long serialVersionUID = 6162414439180656649L;
 
 			@Override
@@ -107,31 +123,37 @@ public class TelaPrincipal extends JFrame {
             }
         });
         
-        listaCompromissos.inserir(new Compromisso("Teste Cliente", "(11)99999-9999", LocalDate.now(), LocalTime.now(), "Descrição Teste"));
-        listaCompromissos.inserir(new Compromisso("Teste Cliente", "(11)99999-9999", LocalDate.now(), LocalTime.now(), "Descrição Teste"));
-        listaCompromissos.inserir(new Compromisso("Teste Cliente", "(11)99999-9999", LocalDate.now(), LocalTime.now(), "Descrição Teste"));
+        listaCompromissos.inserir(new Compromisso("Ana Beatriz", "(21)98765-4321", LocalDate.of(2024, 4, 20), LocalTime.of(15, 30), "Consulta Jurídica"));
+        listaCompromissos.inserir(new Compromisso("Carlos Souza", "(11)92345-6789", LocalDate.of(2024, 5, 10), LocalTime.of(9, 0), "Reunião de Planejamento"));
+        listaCompromissos.inserir(new Compromisso("Juliana Martins", "(85)91234-5678", LocalDate.of(2024, 4, 25), LocalTime.of(14, 15), "Discussão de Contrato"));
+        listaCompromissos.inserir(new Compromisso("Marcos Ribeiro", "(21)99876-5432", LocalDate.of(2024, 4, 15), LocalTime.of(16, 45), "Revisão de Processo"));
+        listaCompromissos.inserir(new Compromisso("Fernanda Lima", "(11)98888-7777", LocalDate.of(2024, 5, 5), LocalTime.of(11, 30), "Consultoria de Negócios"));
+        listaCompromissos.inserir(new Compromisso("Roberto Carlos", "(31)97777-6666", LocalDate.of(2024, 5, 22), LocalTime.of(10, 0), "Auditoria Interna"));
+        listaCompromissos.inserir(new Compromisso("Luciana Alves", "(21)96666-5555", LocalDate.of(2024, 5, 18), LocalTime.of(8, 30), "Entrevista de Emprego"));
+        listaCompromissos.inserir(new Compromisso("Paulo Henrique", "(11)95555-4444", LocalDate.of(2024, 4, 28), LocalTime.of(13, 0), "Acompanhamento de Projeto"));
+        listaCompromissos.inserir(new Compromisso("Sandra Gomes", "(85)94444-3333", LocalDate.of(2024, 5, 12), LocalTime.of(17, 45), "Feedback do Cliente"));
+        listaCompromissos.inserir(new Compromisso("Tiago Nunes", "(11)93333-2222", LocalDate.of(2024, 4, 30), LocalTime.of(12, 15), "Alinhamento Estratégico"));
 
-        
         atualizarListaCompromissos();
         
         JScrollPane scrollPane = new JScrollPane(tabelaCompromissos);
-        scrollPane.setBounds(10, 90, 854, 306);  
+        scrollPane.setBounds(10, 265, 854, 131);  
         getContentPane().add(scrollPane);
         
         JPanel painelFerramentas = new JPanel(null);
-        painelFerramentas.setBounds(10, 0, 854, 170);  
+        painelFerramentas.setBounds(10, 84, 854, 170);  
         getContentPane().add(painelFerramentas);
         
         JButton botaoAdicionar = new JButton("Adicionar");
-        botaoAdicionar.setBounds(344, 51, 90, 30);  
+        botaoAdicionar.setBounds(544, 129, 90, 30);  
         botaoAdicionar.addActionListener(e -> {
-            FormularioCompromisso formulario = new FormularioCompromisso(this, listaCompromissos, this);
+            FormularioAdicionar formulario = new FormularioAdicionar(this, listaCompromissos, this);
             formulario.setVisible(true);
         });
         painelFerramentas.add(botaoAdicionar);
         
         JButton botaoEditar = new JButton("Editar");
-        botaoEditar.setBounds(544, 51, 90, 30); 
+        botaoEditar.setBounds(754, 129, 90, 30); 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -141,7 +163,7 @@ public class TelaPrincipal extends JFrame {
                         int compromissoId = (Integer) modelo.getValueAt(selectedRow, 0);
                         Compromisso compromissoSelecionado = listaCompromissos.findCompromissoById(compromissoId);
                         if (compromissoSelecionado != null) {
-                        	FormularioEdicao formularioEdicao = new FormularioEdicao(TelaPrincipal.this, listaCompromissos, TelaPrincipal.this, compromissoSelecionado);
+                        	FormularioEditar formularioEdicao = new FormularioEditar(TelaPrincipal.this, listaCompromissos, TelaPrincipal.this, compromissoSelecionado);
                             formularioEdicao.setVisible(true);
                         } else {
                             JOptionPane.showMessageDialog(TelaPrincipal.this, "Compromisso não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -158,7 +180,7 @@ public class TelaPrincipal extends JFrame {
         painelFerramentas.add(botaoEditar);
 
         JButton botaoDeletar = new JButton("Deletar");
-        botaoDeletar.setBounds(444, 51, 90, 30);
+        botaoDeletar.setBounds(654, 129, 90, 30);
         botaoDeletar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -186,12 +208,7 @@ public class TelaPrincipal extends JFrame {
             }
         });
         painelFerramentas.add(botaoDeletar);
-
-        JButton botaoSeparar = new JButton("Separar Executados/Não Executados");
-        botaoSeparar.setBounds(484, 10, 250, 30); 
-        botaoSeparar.addActionListener(e -> listaCompromissos.separarCompromissosExecutados());
-        painelFerramentas.add(botaoSeparar);
-        
+   
         JButton botaoExecutar = new JButton("Executar");
         botaoExecutar.setBounds(744, 10, 100, 30);
         botaoExecutar.addActionListener(new ActionListener() {
@@ -226,68 +243,18 @@ public class TelaPrincipal extends JFrame {
             }
         });
         painelFerramentas.add(botaoExecutar);
-        
-        JButton botaoRelatorioDeque = new JButton("Relatório Deque");
-        botaoRelatorioDeque.setBounds(340, 10, 127, 30);
-        botaoRelatorioDeque.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                listaCompromissos.apresentarDequeCompromissos();
-            }
-        });
-        painelFerramentas.add(botaoRelatorioDeque);
-        
-        JButton botaoListaTelefonica = new JButton("Mostrar Lista Telefônica");
-        botaoListaTelefonica.setBounds(644, 50, 200, 30);
-        botaoListaTelefonica.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Set<Compromisso> listaTelefonica = listaCompromissos.criarListaTelefonica();
-                mostrarListaTelefonica(listaTelefonica);
-            }
-        });
-        painelFerramentas.add(botaoListaTelefonica);
-
-        JTextField campoNomeCliente = new JTextField();
-        campoNomeCliente.setBounds(10, 50, 100, 20); 
-        painelFerramentas.add(campoNomeCliente);
-
-        JButton botaoMostrarFilaCliente = new JButton("Mostrar Fila do Cliente");
-        botaoMostrarFilaCliente.setBounds(120, 50, 200, 20);
-        botaoMostrarFilaCliente.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String nomeCliente = campoNomeCliente.getText().trim(); 
-                if (nomeCliente.isEmpty()) {
-                    JOptionPane.showMessageDialog(TelaPrincipal.this, "Por favor, insira o nome do cliente.", "Nome do Cliente Vazio", JOptionPane.WARNING_MESSAGE);
-                } else if (!listaCompromissos.pesquisarPorNomeCliente(nomeCliente)) {
-                    JOptionPane.showMessageDialog(TelaPrincipal.this, "Cliente não encontrado.", "Cliente Inexistente", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    Queue<Compromisso> filaAtendimentos = listaCompromissos.criarFilaAtendimentosCliente(nomeCliente);
-                    if (filaAtendimentos.isEmpty()) {
-                        JOptionPane.showMessageDialog(TelaPrincipal.this, "Não há atendimentos para este cliente.", "Nenhum Atendimento", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        mostrarFilaAtendimentosCliente(filaAtendimentos);
-                    }
-                }
-            }
-        });
-        painelFerramentas.add(botaoMostrarFilaCliente);
-        
-        JLabel labelData = new JLabel("Data:");
-        JSpinner spinnerData = new JSpinner(new SpinnerDateModel());
-        spinnerData.setEditor(new JSpinner.DateEditor(spinnerData, "dd/MM/yyyy"));
-        spinnerData.setBounds(10, 15, 100, 20);
-        painelFerramentas.add(labelData);
-        painelFerramentas.add(spinnerData);
+            
+        JCalendar calendar = new JCalendar();
+        calendar.setBounds(10, 10, 377, 149); 
+        painelFerramentas.add(calendar);
 
         JButton botaoMostrarListaData = new JButton("Mostrar Atendimentos Data");
-        botaoMostrarListaData.setBounds(130, 15, 200, 20);
+        botaoMostrarListaData.setBounds(394, 15, 200, 20);
         botaoMostrarListaData.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Date dataSelecionada = (Date) spinnerData.getValue();
-                LocalDate data = LocalDate.ofInstant(dataSelecionada.toInstant(), ZoneId.systemDefault());
+                Date dataSelecionada = calendar.getDate();
+                LocalDate data = dataSelecionada.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
                 List<Compromisso> atendimentosData = listaCompromissos.criarListaPorData(data);
                 if (atendimentosData.isEmpty()) {
@@ -311,7 +278,7 @@ public class TelaPrincipal extends JFrame {
         painelPesquisa.add(botaoPesquisar);
         getContentPane().add(painelPesquisa);
     }
-    
+     
     private void mostrarAtendimentosData(List<Compromisso> atendimentosData) {
         JDialog dialogoAtendimentos = new JDialog();
         dialogoAtendimentos.setTitle("Atendimentos da Data");
@@ -331,26 +298,33 @@ public class TelaPrincipal extends JFrame {
         dialogoAtendimentos.setLocationRelativeTo(null);
         dialogoAtendimentos.setVisible(true);
     }
+   
+    private void abrirDialogoItemD() {
+        JDialog dialog = new JDialog(this, "Buscar Atendimentos por Cliente", true);
+        dialog.setSize(300, 200);
+        dialog.setLayout(null);
 
-    
-    private void mostrarFilaAtendimentosCliente(Queue<Compromisso> filaAtendimentos) {
-        JDialog dialogoFila = new JDialog();
-        dialogoFila.setTitle("Fila de Atendimentos do Cliente");
-        JTextArea textAreaFila = new JTextArea(15, 50);
-        textAreaFila.setEditable(false);
-        StringBuilder relatorio = new StringBuilder("Fila de Atendimentos:\n");
+        JTextField textField = new JTextField();
+        textField.setBounds(50, 30, 200, 25);
 
-        for (Compromisso compromisso : filaAtendimentos) {
-            relatorio.append(compromisso.toString()).append("\n");
-        }
+        JButton button = new JButton("Buscar");
+        button.setBounds(50, 80, 200, 25);
 
-        textAreaFila.setText(relatorio.toString());
-        dialogoFila.getContentPane().add(new JScrollPane(textAreaFila));
-        dialogoFila.pack();
-        dialogoFila.setLocationRelativeTo(null);
-        dialogoFila.setVisible(true);
+        button.addActionListener(e -> {
+            if (!textField.getText().trim().isEmpty()) {
+                listaCompromissos.mostrarAtendimentosCliente(textField.getText().trim(), dialog);
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Por favor, insira o nome do cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.add(textField);
+        dialog.add(button);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
-    
+
+
     private void mostrarListaTelefonica(Set<Compromisso> listaTelefonica) {
         JDialog dialogoLista = new JDialog();
         dialogoLista.setTitle("Lista Telefônica");

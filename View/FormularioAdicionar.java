@@ -1,15 +1,20 @@
 package View;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import Core.Compromisso;
 import Core.ListaDuplamenteEncadeada;
 
-public class FormularioCompromisso extends JDialog {
+public class FormularioAdicionar extends JDialog {
 
     private static final long serialVersionUID = -6638740306635907415L;
     private PlaceholderTextField campoNomeCliente, campoTelefone, campoData, campoHora;
@@ -19,10 +24,10 @@ public class FormularioCompromisso extends JDialog {
     private ListaDuplamenteEncadeada listaCompromissos;
     private TelaPrincipal telaPrincipal;
 
-    public FormularioCompromisso(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal) {
+    public FormularioAdicionar(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal) {
         super(parent, "Compromisso", true);
-        this.listaCompromissos = listaCompromissos;
-        this.telaPrincipal = telaPrincipal;
+        this.setListaCompromissos(listaCompromissos);
+        this.setTelaPrincipal(telaPrincipal);
         setSize(700, 400);
         setLayout(null); 
 
@@ -73,7 +78,7 @@ public class FormularioCompromisso extends JDialog {
                 String descricao = areaDescricao.getText();
 
                 if(nomeCliente.isEmpty() || telefone.isEmpty() || dataString.isEmpty() || horaString.isEmpty() || descricao.isEmpty()) {
-                    JOptionPane.showMessageDialog(FormularioCompromisso.this, "Todos os campos devem ser preenchidos.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(FormularioAdicionar.this, "Todos os campos devem ser preenchidos.", "Erro", JOptionPane.ERROR_MESSAGE);
                     return; 
                 }
 
@@ -93,12 +98,28 @@ public class FormularioCompromisso extends JDialog {
                 setVisible(false);
                 dispose();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(FormularioCompromisso.this, "Erro ao salvar o compromisso. Verifique os dados e tente novamente.\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(FormularioAdicionar.this, "Erro ao salvar o compromisso. Verifique os dados e tente novamente.\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         setLocationRelativeTo(parent);
     }
+
+	public ListaDuplamenteEncadeada getListaCompromissos() {
+		return listaCompromissos;
+	}
+
+	public void setListaCompromissos(ListaDuplamenteEncadeada listaCompromissos) {
+		this.listaCompromissos = listaCompromissos;
+	}
+
+	public TelaPrincipal getTelaPrincipal() {
+		return telaPrincipal;
+	}
+
+	public void setTelaPrincipal(TelaPrincipal telaPrincipal) {
+		this.telaPrincipal = telaPrincipal;
+	}
 }
 
     
