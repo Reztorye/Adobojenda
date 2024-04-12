@@ -69,7 +69,7 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
     }
 
     public boolean isExecutado() {
-        return executado;
+    	  return this.executado;
     }
 
     public void setTelefone(String telefone) {
@@ -87,7 +87,8 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
     @Override
     public String toString() {
         return "Compromisso{" +
-                "nomeCliente='" + nomeCliente + '\'' +
+                "id=" + id +
+                ", nomeCliente='" + nomeCliente + '\'' +
                 ", telefone='" + telefone + '\'' +
                 ", data=" + data +
                 ", hora=" + hora +
