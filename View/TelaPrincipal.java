@@ -1,18 +1,20 @@
 package View;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -75,6 +77,11 @@ public class TelaPrincipal extends JFrame {
         JMenuItem menuItemD = new JMenuItem("Item D");
         menuItemD.addActionListener(e -> abrirDialogoItemD());
         menuTasks.add(menuItemD);
+        
+        JMenuItem menuItemE = new JMenuItem("Item E");
+        menuItemE.addActionListener(e -> abrirDialogoItemE());
+        menuTasks.add(menuItemE);
+
         
         menuBar.add(menuTasks);
 
@@ -244,28 +251,7 @@ public class TelaPrincipal extends JFrame {
         });
         painelFerramentas.add(botaoExecutar);
             
-        JCalendar calendar = new JCalendar();
-        calendar.setBounds(10, 10, 377, 149); 
-        painelFerramentas.add(calendar);
 
-        JButton botaoMostrarListaData = new JButton("Mostrar Atendimentos Data");
-        botaoMostrarListaData.setBounds(394, 15, 200, 20);
-        botaoMostrarListaData.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Date dataSelecionada = calendar.getDate();
-                LocalDate data = dataSelecionada.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-                List<Compromisso> atendimentosData = listaCompromissos.criarListaPorData(data);
-                if (atendimentosData.isEmpty()) {
-                    JOptionPane.showMessageDialog(TelaPrincipal.this, "Não há atendimentos para esta data.", "Sem Atendimentos", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    mostrarAtendimentosData(atendimentosData);
-                }
-            }
-        });
-        painelFerramentas.add(botaoMostrarListaData);
-   
         JPanel painelPesquisa = new JPanel(null);
         painelPesquisa.setBounds(10, 407, 854, 41); 
         
@@ -278,53 +264,94 @@ public class TelaPrincipal extends JFrame {
         painelPesquisa.add(botaoPesquisar);
         getContentPane().add(painelPesquisa);
     }
-     
-    private void mostrarAtendimentosData(List<Compromisso> atendimentosData) {
-        JDialog dialogoAtendimentos = new JDialog();
-        dialogoAtendimentos.setTitle("Atendimentos da Data");
-        JTextArea textAreaAtendimentos = new JTextArea(15, 50);
-        textAreaAtendimentos.setEditable(false);
-        StringBuilder relatorio = new StringBuilder("Atendimentos:\n");
-
-        for (Compromisso compromisso : atendimentosData) {
-            relatorio.append(compromisso.toString()).append(" - Executado: ")
-                     .append(compromisso.isExecutado() ? "Sim" : "Não")
-                     .append("\n");
-        }
-
-        textAreaAtendimentos.setText(relatorio.toString());
-        dialogoAtendimentos.getContentPane().add(new JScrollPane(textAreaAtendimentos));
-        dialogoAtendimentos.pack();
-        dialogoAtendimentos.setLocationRelativeTo(null);
-        dialogoAtendimentos.setVisible(true);
-    }
    
     private void abrirDialogoItemD() {
         JDialog dialog = new JDialog(this, "Buscar Atendimentos por Cliente", true);
-        dialog.setSize(300, 200);
+        dialog.setSize(315, 150);
         dialog.setLayout(null);
+        
+        JLabel labelNome = new JLabel("Nome do Cliente:");
+        labelNome.setBounds(10, 20, 120, 25);
+        dialog.add(labelNome);
 
         JTextField textField = new JTextField();
-        textField.setBounds(50, 30, 200, 25);
+        textField.setBounds(130, 20, 160, 25);
+        dialog.add(textField);
 
         JButton button = new JButton("Buscar");
-        button.setBounds(50, 80, 200, 25);
+        button.setBounds(100, 60, 100, 25);
+        dialog.add(button);
 
         button.addActionListener(e -> {
-            if (!textField.getText().trim().isEmpty()) {
-                listaCompromissos.mostrarAtendimentosCliente(textField.getText().trim(), dialog);
+            String nomeCliente = textField.getText().trim();
+            if (!nomeCliente.isEmpty()) {
+                if (listaCompromissos.pesquisarPorNomeCliente(nomeCliente)) {
+                    mostrarAtendimentosCliente(nomeCliente, dialog);
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Cliente não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 JOptionPane.showMessageDialog(dialog, "Por favor, insira o nome do cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        dialog.add(textField);
-        dialog.add(button);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
+    
+    private void abrirDialogoItemE() {
+        JDialog dialog = new JDialog(this, "Buscar Atendimentos por Data", true);
+        dialog.setSize(400, 300);
+        dialog.setLayout(null);
 
+        JCalendar calendar = new JCalendar();
+        calendar.setBounds(10, 10, 300, 200);
+        dialog.add(calendar);
 
+        JButton button = new JButton("Buscar");
+        button.setBounds(150, 220, 100, 30);
+        dialog.add(button);
+
+        button.addActionListener(e -> {
+            LocalDate data = calendar.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            mostrarAtendimentosPorData(data, dialog);
+        });
+
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+    
+    // Método Auxiliar do item D
+    private void mostrarAtendimentosCliente(String nomeCliente, JDialog parentDialog) {
+        Queue<Compromisso> filaAtendimentos = listaCompromissos.criarFilaAtendimentosCliente(nomeCliente);
+
+        if (filaAtendimentos.isEmpty()) {
+            JOptionPane.showMessageDialog(parentDialog, "Nenhum atendimento encontrado para o cliente: " + nomeCliente, "Resultado", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JTextArea textArea = new JTextArea(10, 30);
+            textArea.setEditable(false);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            StringBuilder sb = new StringBuilder();
+            for (Compromisso compromisso : filaAtendimentos) {
+                sb.append("ID: ").append(compromisso.getId())
+                  .append(", Cliente: ").append(compromisso.getNomeCliente())
+                  .append(", Data: ").append(compromisso.getData())
+                  .append(", Hora: ").append(compromisso.getHora())
+                  .append(", Descrição: ").append(compromisso.getDescricao())
+                  .append(", Executado: ").append(compromisso.isExecutado() ? "Sim" : "Não")
+                  .append("\n");
+            }
+            textArea.setText(sb.toString());
+            
+            JDialog resultDialog = new JDialog(parentDialog, "Resultados da Busca", true);
+            resultDialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
+            resultDialog.pack();
+            resultDialog.setLocationRelativeTo(parentDialog);
+            resultDialog.setVisible(true);
+        }
+    }
+
+    
     private void mostrarListaTelefonica(Set<Compromisso> listaTelefonica) {
         JDialog dialogoLista = new JDialog();
         dialogoLista.setTitle("Lista Telefônica");
@@ -345,6 +372,37 @@ public class TelaPrincipal extends JFrame {
         dialogoLista.setLocationRelativeTo(null);
         dialogoLista.setVisible(true);
     }
+    
+    // Método Auxiliar do item E
+    private void mostrarAtendimentosPorData(LocalDate data, JDialog parentDialog) {
+        List<Compromisso> atendimentosData = listaCompromissos.criarListaPorData(data);
+
+        if (atendimentosData.isEmpty()) {
+            JOptionPane.showMessageDialog(parentDialog, "Não há atendimentos para esta data.", "Sem Atendimentos", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JTextArea textArea = new JTextArea(10, 30);
+            textArea.setEditable(false);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            StringBuilder sb = new StringBuilder();
+            for (Compromisso compromisso : atendimentosData) {
+                sb.append("ID: ").append(compromisso.getId())
+                  .append(", Cliente: ").append(compromisso.getNomeCliente())
+                  .append(", Data: ").append(compromisso.getData())
+                  .append(", Hora: ").append(compromisso.getHora())
+                  .append(", Descrição: ").append(compromisso.getDescricao())
+                  .append(", Executado: ").append(compromisso.isExecutado() ? "Sim" : "Não")
+                  .append("\n");
+            }
+            textArea.setText(sb.toString());
+
+            JDialog resultDialog = new JDialog(parentDialog, "Resultados da Busca", true);
+            resultDialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
+            resultDialog.pack();
+            resultDialog.setLocationRelativeTo(parentDialog);
+            resultDialog.setVisible(true);
+        }
+    }
+
 
     public void atualizarListaCompromissos() {
         modelo.setRowCount(0);

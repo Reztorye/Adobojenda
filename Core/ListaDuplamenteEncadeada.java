@@ -12,7 +12,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -308,16 +307,6 @@ public class ListaDuplamenteEncadeada {
         resultadoDialogo.setVisible(true);
     }
     
-    public void mostrarAtendimentosCliente(String nomeCliente, JDialog dialog) {
-        Queue<Compromisso> filaAtendimentos = criarFilaAtendimentosCliente(nomeCliente);
-        StringBuilder sb = new StringBuilder("Atendimentos para o cliente: " + nomeCliente + "\n");
-        for (Compromisso compromisso : filaAtendimentos) {
-            sb.append(compromisso.toString()).append("\n");
-        }
-        
-        JOptionPane.showMessageDialog(dialog, sb.toString());
-    }
-
     public int getTamanho() {
         return tamanho;
     }
