@@ -35,11 +35,13 @@ public class FormularioAdicionar extends JDialog {
         campoHora = new PlaceholderTextField("HH:mm");
         areaDescricao = new JTextArea();
         scrollDescricao = new JScrollPane(areaDescricao, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
+        
+        areaDescricao.setLineWrap(true);
+        areaDescricao.setWrapStyleWord(true);
+        
         botaoSalvar = new JButton("Salvar");
         botaoCancelar = new JButton("Cancelar");
 
-        // Setting bounds for each component
         campoNomeCliente.setBounds(20, 20, 300, 25);
         campoTelefone.setBounds(20, 60, 300, 25);
         campoData.setBounds(20, 100, 300, 25);
@@ -49,14 +51,12 @@ public class FormularioAdicionar extends JDialog {
         botaoSalvar.setBounds(50, 300, 100, 30);
         botaoCancelar.setBounds(200, 300, 100, 30);
 
-        // Adding labels
         add(new JLabel("Nome do Cliente:")).setBounds(20, 0, 120, 20);
         add(new JLabel("Telefone:")).setBounds(20, 40, 120, 20);
         add(new JLabel("Data (dd/mm/aaaa):")).setBounds(20, 80, 140, 20);
         add(new JLabel("Hora (HH:mm):")).setBounds(20, 120, 120, 20);
         add(new JLabel("Descrição:")).setBounds(20, 160, 120, 20);
 
-        // Adding components to dialog
         add(campoNomeCliente);
         add(campoTelefone);
         add(campoData);

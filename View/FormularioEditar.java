@@ -14,9 +14,9 @@ public class FormularioEditar extends JDialog {
     private JButton botaoSalvar, botaoCancelar;
     private JScrollPane scrollDescricao;
     @SuppressWarnings("unused")
-	private ListaDuplamenteEncadeada listaCompromissos;
+    private ListaDuplamenteEncadeada listaCompromissos;
     @SuppressWarnings("unused")
-	private TelaPrincipal telaPrincipal;
+    private TelaPrincipal telaPrincipal;
     private Compromisso compromissoAtual;
 
     public FormularioEditar(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal, Compromisso compromisso) {
@@ -24,14 +24,14 @@ public class FormularioEditar extends JDialog {
         this.listaCompromissos = listaCompromissos;
         this.telaPrincipal = telaPrincipal;
         this.compromissoAtual = compromisso;
-        
+
         setSize(700, 400);
         setLayout(null);
 
         campoNomeCliente = new JTextField(compromisso.getNomeCliente());
         campoTelefone = new JTextField(compromisso.getTelefone());
-        campoData = new JTextField(compromisso.getData().toString()); 
-        campoHora = new JTextField(compromisso.getHora().toString()); 
+        campoData = new JTextField(compromisso.getData().toString());
+        campoHora = new JTextField(compromisso.getHora().toString());
         areaDescricao = new JTextArea(compromisso.getDescricao(), 5, 20);
         scrollDescricao = new JScrollPane(areaDescricao);
 
@@ -70,7 +70,7 @@ public class FormularioEditar extends JDialog {
             try {
                 compromissoAtual.setNomeCliente(campoNomeCliente.getText());
                 compromissoAtual.setTelefone(campoTelefone.getText());
-                compromissoAtual.setHora(LocalTime.parse(campoHora.getText())); 
+                compromissoAtual.setHora(LocalTime.parse(campoHora.getText()));
                 compromissoAtual.setDescricao(areaDescricao.getText());
 
                 telaPrincipal.atualizarListaCompromissos();

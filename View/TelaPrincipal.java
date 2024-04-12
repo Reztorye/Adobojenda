@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -29,6 +31,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 import com.toedter.calendar.JCalendar;
 
@@ -45,7 +48,7 @@ public class TelaPrincipal extends JFrame {
     public TelaPrincipal(ListaDuplamenteEncadeada listaCompromissos) {
         super("Adobojenda - Tela Principal");
         this.listaCompromissos = listaCompromissos;
-        setSize(890, 498);
+        setSize(940, 420);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
         
@@ -80,23 +83,11 @@ public class TelaPrincipal extends JFrame {
         
         JMenuItem menuItemE = new JMenuItem("Item E");
         menuItemE.addActionListener(e -> abrirDialogoItemE());
-        menuTasks.add(menuItemE);
-
-        
-        menuBar.add(menuTasks);
-
-        setJMenuBar(menuBar);
-
-        JMenu menuCompromissos = new JMenu("Compromissos");
-        JMenuItem menuItemAdicionar = new JMenuItem("Adicionar");
-        menuItemAdicionar.addActionListener(e -> {
-            FormularioAdicionar formulario = new FormularioAdicionar(this, listaCompromissos, this);
-            formulario.setVisible(true);
-        });
-        menuCompromissos.add(menuItemAdicionar);
-
+        menuTasks.add(menuItemE);   
+           
+        menuBar.add(menuTasks);	
         menuBar.add(menuArquivo);
-        menuBar.add(menuCompromissos);
+        setJMenuBar(menuBar);
 
         setLocationRelativeTo(null);
         
@@ -130,6 +121,11 @@ public class TelaPrincipal extends JFrame {
             }
         });
         
+        TableColumnModel columnModel = tabelaCompromissos.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(30);
+        columnModel.getColumn(4).setPreferredWidth(70); 
+        columnModel.getColumn(5).setPreferredWidth(300);
+        
         listaCompromissos.inserir(new Compromisso("Ana Beatriz", "(21)98765-4321", LocalDate.of(2024, 4, 20), LocalTime.of(15, 30), "Consulta Jurídica"));
         listaCompromissos.inserir(new Compromisso("Carlos Souza", "(11)92345-6789", LocalDate.of(2024, 5, 10), LocalTime.of(9, 0), "Reunião de Planejamento"));
         listaCompromissos.inserir(new Compromisso("Juliana Martins", "(85)91234-5678", LocalDate.of(2024, 4, 25), LocalTime.of(14, 15), "Discussão de Contrato"));
@@ -144,15 +140,15 @@ public class TelaPrincipal extends JFrame {
         atualizarListaCompromissos();
         
         JScrollPane scrollPane = new JScrollPane(tabelaCompromissos);
-        scrollPane.setBounds(10, 265, 854, 131);  
+        scrollPane.setBounds(10, 71, 900, 218);  
         getContentPane().add(scrollPane);
         
         JPanel painelFerramentas = new JPanel(null);
-        painelFerramentas.setBounds(10, 84, 854, 170);  
+        painelFerramentas.setBounds(10, 10, 900, 50);  
         getContentPane().add(painelFerramentas);
         
         JButton botaoAdicionar = new JButton("Adicionar");
-        botaoAdicionar.setBounds(544, 129, 90, 30);  
+        botaoAdicionar.setBounds(0, 10, 90, 30);  
         botaoAdicionar.addActionListener(e -> {
             FormularioAdicionar formulario = new FormularioAdicionar(this, listaCompromissos, this);
             formulario.setVisible(true);
@@ -160,7 +156,7 @@ public class TelaPrincipal extends JFrame {
         painelFerramentas.add(botaoAdicionar);
         
         JButton botaoEditar = new JButton("Editar");
-        botaoEditar.setBounds(754, 129, 90, 30); 
+        botaoEditar.setBounds(200, 10, 90, 30); 
         botaoEditar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -187,7 +183,7 @@ public class TelaPrincipal extends JFrame {
         painelFerramentas.add(botaoEditar);
 
         JButton botaoDeletar = new JButton("Deletar");
-        botaoDeletar.setBounds(654, 129, 90, 30);
+        botaoDeletar.setBounds(100, 10, 90, 30);
         botaoDeletar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -217,7 +213,7 @@ public class TelaPrincipal extends JFrame {
         painelFerramentas.add(botaoDeletar);
    
         JButton botaoExecutar = new JButton("Executar");
-        botaoExecutar.setBounds(744, 10, 100, 30);
+        botaoExecutar.setBounds(790, 10, 100, 30);
         botaoExecutar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -251,36 +247,71 @@ public class TelaPrincipal extends JFrame {
         });
         painelFerramentas.add(botaoExecutar);
             
-
         JPanel painelPesquisa = new JPanel(null);
-        painelPesquisa.setBounds(10, 407, 854, 41); 
+        painelPesquisa.setBounds(10, 300, 900, 50); 
         
         JTextField campoPesquisa = new JTextField();
-        campoPesquisa.setBounds(10, 5, 200, 30);
+        campoPesquisa.setBounds(0, 5, 200, 30);
         
         JButton botaoPesquisar = new JButton("Pesquisar");
-        botaoPesquisar.setBounds(220, 5, 100, 30);  
+        botaoPesquisar.setBounds(210, 5, 100, 30);  
         painelPesquisa.add(campoPesquisa);
         painelPesquisa.add(botaoPesquisar);
         getContentPane().add(painelPesquisa);
+        
+        botaoPesquisar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String termoPesquisa = campoPesquisa.getText().trim().toLowerCase(); 
+
+                if (!termoPesquisa.isEmpty()) {
+                    List<Compromisso> compromissosFiltrados = new ArrayList<>();
+
+                    for (Compromisso compromisso : listaCompromissos.getTodosCompromissos()) {
+                        if (compromisso.getNomeCliente().toLowerCase().contains(termoPesquisa) ||
+                            compromisso.getTelefone().contains(termoPesquisa) ||
+                            compromisso.getData().toString().contains(termoPesquisa) ||
+                            compromisso.getHora().toString().contains(termoPesquisa) ||
+                            compromisso.getDescricao().toLowerCase().contains(termoPesquisa)) {
+                            compromissosFiltrados.add(compromisso);
+                        }
+                    }
+
+                    modelo.setRowCount(0);
+                    for (Compromisso compromisso : compromissosFiltrados) {
+                        modelo.addRow(new Object[]{
+                            compromisso.getId(),
+                            compromisso.getNomeCliente(),
+                            compromisso.getTelefone(),
+                            compromisso.getData().toString(),
+                            compromisso.getHora().toString(),
+                            compromisso.getDescricao(),
+                            compromisso.isExecutado()
+                        });
+                    }
+                } else {
+                    atualizarListaCompromissos();
+                }
+            }
+        });
     }
    
     private void abrirDialogoItemD() {
         JDialog dialog = new JDialog(this, "Buscar Atendimentos por Cliente", true);
         dialog.setSize(315, 150);
-        dialog.setLayout(null);
+        dialog.getContentPane().setLayout(null);
         
         JLabel labelNome = new JLabel("Nome do Cliente:");
         labelNome.setBounds(10, 20, 120, 25);
-        dialog.add(labelNome);
+        dialog.getContentPane().add(labelNome);
 
         JTextField textField = new JTextField();
         textField.setBounds(130, 20, 160, 25);
-        dialog.add(textField);
+        dialog.getContentPane().add(textField);
 
         JButton button = new JButton("Buscar");
         button.setBounds(100, 60, 100, 25);
-        dialog.add(button);
+        dialog.getContentPane().add(button);
 
         button.addActionListener(e -> {
             String nomeCliente = textField.getText().trim();
@@ -302,15 +333,15 @@ public class TelaPrincipal extends JFrame {
     private void abrirDialogoItemE() {
         JDialog dialog = new JDialog(this, "Buscar Atendimentos por Data", true);
         dialog.setSize(400, 300);
-        dialog.setLayout(null);
+        dialog.getContentPane().setLayout(null);
 
         JCalendar calendar = new JCalendar();
         calendar.setBounds(10, 10, 300, 200);
-        dialog.add(calendar);
+        dialog.getContentPane().add(calendar);
 
         JButton button = new JButton("Buscar");
         button.setBounds(150, 220, 100, 30);
-        dialog.add(button);
+        dialog.getContentPane().add(button);
 
         button.addActionListener(e -> {
             LocalDate data = calendar.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -411,7 +442,7 @@ public class TelaPrincipal extends JFrame {
                 compromisso.getId(), 
                 compromisso.getNomeCliente(),
                 compromisso.getTelefone(),
-                compromisso.getData().toString(),
+                compromisso.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                 compromisso.getHora().toString(),
                 compromisso.getDescricao(),
                 compromisso.isExecutado()  
