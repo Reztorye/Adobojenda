@@ -1,6 +1,8 @@
 package Core;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
@@ -16,27 +18,58 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class ListaDuplamenteEncadeada {
+    // Ponteiros para o início e fim da lista ajudam a inserir elementos no fim em O(1)
     private No cabeca;
     private No cauda;
     private int tamanho;
+    // Guarda compromissos removidos para possíveis consultas ou restaurações
+    private List<Compromisso> compromissosExcluidos;
 
     public ListaDuplamenteEncadeada() {
+        // Inicialização padrão de uma lista vazia
         this.cabeca = null;
         this.cauda = null;
         this.tamanho = 0;
+        this.compromissosExcluidos = new ArrayList<>();
     }
 
-    public void inserir(Compromisso compromisso) {
-        No novoNo = new No(compromisso);
-        if (cabeca == null) {
+    public boolean inserir(Compromisso novoCompromisso) {
+        // Ajusta automaticamente a hora de término para 1 hora após o início
+        LocalTime horaFim = novoCompromisso.getHora().plusHours(1);
+        novoCompromisso.setHoraFim(horaFim);  
+
+        // Verificação de conflitos antes de inserir evita retrabalho
+        if (existeConflito(novoCompromisso)) {
+            return false;
+        }
+
+        No novoNo = new No(novoCompromisso);
+        if (cabeca == null) { // Primeira inserção na lista vazia
             cabeca = novoNo;
             cauda = novoNo;
-        } else {
+        } else { // Anexa ao fim e atualiza a cauda
             cauda.proximo = novoNo;
             novoNo.anterior = cauda;
             cauda = novoNo;
         }
         tamanho++;
+        return true;
+    }
+
+
+    private boolean existeConflito(Compromisso novoCompromisso) {
+        // Verificação sequencial: possível ponto de melhoria para performance
+        No atual = cabeca;
+        while (atual != null) {
+            Compromisso existente = atual.compromisso;
+            if (existente.getData().equals(novoCompromisso.getData()) &&
+                !(novoCompromisso.getHora().isAfter(existente.getHoraFim()) ||
+                  novoCompromisso.getHoraFim().isBefore(existente.getHora()))) {
+                return true; // Conflito encontrado
+            }
+            atual = atual.proximo;
+        }
+        return false; 
     }
     
     public void confirmarAtendimentoPeloId(int id) {
@@ -150,15 +183,7 @@ public class ListaDuplamenteEncadeada {
     }
     
     public void apresentarDequeCompromissos() {
-        Deque<Compromisso> deque = new LinkedList<>();
-
-        for (Compromisso compromisso : getTodosCompromissos()) {
-            if (compromisso.isExecutado()) {
-                deque.addFirst(compromisso);
-            } else {
-                deque.addLast(compromisso);
-            }
-        }
+        Deque<Compromisso> deque = criarDeque();
 
         JDialog dialogoRelatorio = new JDialog();
         dialogoRelatorio.setTitle("Relatório de Compromissos");
@@ -169,19 +194,31 @@ public class ListaDuplamenteEncadeada {
         relatorio.append("Atendimentos Não Executados:\n");
         for (Compromisso compromisso : deque) {
             if (!compromisso.isExecutado()) {
-                relatorio.append(compromisso.toString()).append("\n");
+                relatorio.append("ID: ").append(compromisso.getId())
+                          .append(", Cliente: ").append(compromisso.getNomeCliente())
+                          .append(", Data: ").append(compromisso.getData())
+                          .append(", Hora Início: ").append(compromisso.getHora())
+                          .append(", Descrição: ").append(compromisso.getDescricao())
+                          .append("\n");
             }
         }
 
         relatorio.append("\nAtendimentos Executados:\n");
         for (Compromisso compromisso : deque) {
             if (compromisso.isExecutado()) {
-                relatorio.append(compromisso.toString()).append("\n");
+                relatorio.append("ID: ").append(compromisso.getId())
+                          .append(", Cliente: ").append(compromisso.getNomeCliente())
+                          .append(", Data: ").append(compromisso.getData())
+                          .append(", Hora Início: ").append(compromisso.getHora())
+                          .append(", Hora Execução: ").append(compromisso.getHoraExecutado().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")))
+                          .append(", Descrição: ").append(compromisso.getDescricao())
+                          .append(", Executado: Sim")
+                          .append("\n");
             }
         }
 
         textAreaRelatorio.setText(relatorio.toString());
-        dialogoRelatorio.add(new JScrollPane(textAreaRelatorio));
+        dialogoRelatorio.getContentPane().add(new JScrollPane(textAreaRelatorio));
         dialogoRelatorio.pack();
         dialogoRelatorio.setLocationRelativeTo(null);
         dialogoRelatorio.setVisible(true);
@@ -191,13 +228,10 @@ public class ListaDuplamenteEncadeada {
         Set<Compromisso> listaTelefonica = new TreeSet<>(new Comparator<Compromisso>() {
             @Override
             public int compare(Compromisso c1, Compromisso c2) {
-                int nomeComp = c1.getNomeCliente().compareToIgnoreCase(c2.getNomeCliente());
-                if (nomeComp != 0) {
-                    return nomeComp;
-                }
-                return Integer.compare(c1.getId(), c2.getId());
+                return c1.getNomeCliente().compareToIgnoreCase(c2.getNomeCliente());
             }
         });
+
         No atual = cabeca;
         while (atual != null) {
             listaTelefonica.add(atual.compromisso);
@@ -239,27 +273,33 @@ public class ListaDuplamenteEncadeada {
         }
     }
     
+    public List<Compromisso> getCompromissosExcluidos() {
+        return compromissosExcluidos;
+    }
+
     public void removerPeloId(int id) {
         No atual = cabeca;
         while (atual != null) {
             if (atual.compromisso.getId() == id) {
+                compromissosExcluidos.add(atual.compromisso);
+
                 if (atual.anterior != null) {
                     atual.anterior.proximo = atual.proximo;
                 } else {
-                    cabeca = atual.proximo;  
+                    cabeca = atual.proximo;
                 }
                 if (atual.proximo != null) {
                     atual.proximo.anterior = atual.anterior;
                 } else {
-                    cauda = atual.anterior;  
+                    cauda = atual.anterior;
                 }
                 tamanho--;
-                return; 
+                return;
             }
             atual = atual.proximo;
         }
     }
-    
+
     public void separarCompromissosExecutados() {
         Stack<Compromisso> pilhaExecutados = new Stack<>();
         Queue<Compromisso> filaNaoExecutados = new LinkedList<>();

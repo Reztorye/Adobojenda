@@ -2,32 +2,35 @@ package Core;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Compromisso implements Comparable<Compromisso>, Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private static int contadorId = 0; 
+    private static final long serialVersionUID = 1L;
+    private static int contadorId = 0; 
     private int id;
-	private String nomeCliente;
+    private String nomeCliente;
     private String telefone;
     private LocalDate data;
     private LocalTime hora;
+    private LocalTime horaFim;  
     private String descricao;
     private boolean executado;
+    private LocalDateTime horaExecutado;
+
 
     public Compromisso(String nomeCliente, String telefone, LocalDate data, LocalTime hora, String descricao) {
-    	this.id = ++contadorId;
+        this.id = ++contadorId;
         this.nomeCliente = nomeCliente;
-        this.setTelefone(telefone); 
+        this.telefone = telefone; 
         this.data = data;
         this.hora = hora;
+        this.horaFim = hora.plusHours(1); 
         this.descricao = descricao;
         this.executado = false; 
     }
-    
+
+    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -48,12 +51,28 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
         return hora;
     }
 
+    public LocalTime getHoraFim() {  
+        return horaFim;
+    }
+
+    public void setHoraFim(LocalTime horaFim) { 
+        this.horaFim = horaFim;
+    }
+
     public String getDescricao() {
         return descricao;
     }
-    
+
+    public boolean isExecutado() {
+        return executado;
+    }
+
     public void setNomeCliente(String nomeCliente) {
         this.nomeCliente = nomeCliente;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
     public void setData(LocalDate data) {
@@ -62,39 +81,23 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
 
     public void setHora(LocalTime hora) {
         this.hora = hora;
+        this.horaFim = hora.plusHours(1); 
     }
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
 
-    public boolean isExecutado() {
-    	  return this.executado;
-    }
-
-    public void setTelefone(String telefone) {
-        if (telefone.matches("\\(\\d{2}\\) ?\\d{5}-\\d{4}")) {
-            this.telefone = telefone;
-        } else {
-            throw new IllegalArgumentException("Formato de telefone inválido.");
-        }
-    }
-
     public void setExecutado(boolean executado) {
         this.executado = executado;
     }
+    
+    public LocalDateTime getHoraExecutado() {
+        return horaExecutado;
+    }
 
-    @Override
-    public String toString() {
-        return "Compromisso{" +
-                "id=" + id +
-                ", nomeCliente='" + nomeCliente + '\'' +
-                ", telefone='" + telefone + '\'' +
-                ", data=" + data +
-                ", hora=" + hora +
-                ", descricao='" + descricao + '\'' +
-                ", executado=" + executado +
-                '}';
+    public void setHoraExecutado(LocalDateTime horaExecutado) {
+        this.horaExecutado = horaExecutado;
     }
 
     @Override
@@ -105,7 +108,18 @@ public class Compromisso implements Comparable<Compromisso>, Serializable {
         }
         return comparacaoData;
     }
-    
 
-
+    @Override
+    public String toString() {
+        return "Compromisso{" +
+                "id=" + id +
+                ", nomeCliente='" + nomeCliente + '\'' +
+                ", telefone='" + telefone + '\'' +
+                ", data=" + data +
+                ", hora=" + hora +
+                ", horaFim=" + horaFim +
+                ", descricao='" + descricao + '\'' +
+                ", executado=" + executado +
+                '}';
+    }
 }

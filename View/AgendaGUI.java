@@ -20,6 +20,7 @@ public class AgendaGUI extends JFrame {
         super("Bem-Vindo à Adobojenda");
         setSize(400, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         getContentPane().setLayout(null);
 
         JLabel mensagemBoasVindas = new JLabel("<html><center>Bem-vindo à Adobojenda!<br>Sua agenda confiável.</center></html>", JLabel.CENTER);

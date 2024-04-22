@@ -1,61 +1,68 @@
 package View;
 
-import javax.swing.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import Core.Compromisso;
 import Core.ListaDuplamenteEncadeada;
 
 public class FormularioEditar extends JDialog {
-
-    private static final long serialVersionUID = 1L;
-    private JTextField campoNomeCliente, campoTelefone, campoData, campoHora;
+	private static final long serialVersionUID = -2499895612334573738L;
+	private JTextField campoNomeCliente, campoTelefone, campoData, campoHora;
     private JTextArea areaDescricao;
     private JButton botaoSalvar, botaoCancelar;
-    private JScrollPane scrollDescricao;
     @SuppressWarnings("unused")
-    private ListaDuplamenteEncadeada listaCompromissos;
-    @SuppressWarnings("unused")
-    private TelaPrincipal telaPrincipal;
-    private Compromisso compromissoAtual;
+	private Compromisso compromissoAtual;
 
-    public FormularioEditar(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal, Compromisso compromisso) {
+    public FormularioEditar(JFrame parent, ListaDuplamenteEncadeada listaCompromissos, TelaPrincipal telaPrincipal, Compromisso compromissoAtual) {
         super(parent, "Editar Compromisso", true);
-        this.listaCompromissos = listaCompromissos;
-        this.telaPrincipal = telaPrincipal;
-        this.compromissoAtual = compromisso;
-
-        setSize(700, 400);
+        this.compromissoAtual = compromissoAtual; 
+        setSize(350, 450);
         setLayout(null);
+        setResizable(false);
 
-        campoNomeCliente = new JTextField(compromisso.getNomeCliente());
-        campoTelefone = new JTextField(compromisso.getTelefone());
-        campoData = new JTextField(compromisso.getData().toString());
-        campoHora = new JTextField(compromisso.getHora().toString());
-        areaDescricao = new JTextArea(compromisso.getDescricao(), 5, 20);
-        scrollDescricao = new JScrollPane(areaDescricao);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        campoNomeCliente = new JTextField(compromissoAtual.getNomeCliente());
+        campoTelefone = new JTextField(compromissoAtual.getTelefone());
+        campoData = new JTextField(dateFormatter.format(compromissoAtual.getData()));
+        campoHora = new JTextField(compromissoAtual.getHora().toString());
+        areaDescricao = new JTextArea(compromissoAtual.getDescricao(), 5, 20);
+        JScrollPane scrollDescricao = new JScrollPane(areaDescricao);
 
         botaoSalvar = new JButton("Salvar");
         botaoCancelar = new JButton("Cancelar");
 
-        campoNomeCliente.setBounds(150, 20, 200, 25);
-        campoTelefone.setBounds(150, 60, 200, 25);
-        campoData.setBounds(150, 100, 200, 25);
-        campoHora.setBounds(150, 140, 200, 25);
-        scrollDescricao.setBounds(150, 180, 200, 75);
+        campoNomeCliente.setBounds(20, 50, 300, 30);
+        campoTelefone.setBounds(20, 100, 300, 30);
+        campoData.setBounds(20, 150, 300, 30);
+        campoHora.setBounds(20, 200, 300, 30);
+        scrollDescricao.setBounds(20, 250, 310, 100);
 
-        botaoSalvar.setBounds(150, 270, 95, 30);
-        botaoCancelar.setBounds(255, 270, 95, 30);
+        botaoSalvar.setBounds(55, 360, 100, 30);
+        botaoCancelar.setBounds(195, 360, 100, 30);
 
-        add(new JLabel("Nome do Cliente:")).setBounds(20, 20, 120, 25);
+        add(new JLabel("Nome do Cliente:")).setBounds(20, 30, 140, 20);
         add(campoNomeCliente);
-        add(new JLabel("Telefone:")).setBounds(20, 60, 120, 25);
+        add(new JLabel("Telefone:")).setBounds(20, 80, 140, 20);
         add(campoTelefone);
-        add(new JLabel("Data:")).setBounds(20, 100, 120, 25);
+        add(new JLabel("Data:")).setBounds(20, 130, 140, 20);
         add(campoData);
-        add(new JLabel("Hora:")).setBounds(20, 140, 120, 25);
+        add(new JLabel("Hora:")).setBounds(20, 180, 140, 20);
         add(campoHora);
-        add(new JLabel("Descrição:")).setBounds(20, 180, 120, 25);
+        add(new JLabel("Descrição:")).setBounds(20, 230, 140, 20);
         add(scrollDescricao);
 
         add(botaoSalvar);
@@ -68,17 +75,38 @@ public class FormularioEditar extends JDialog {
 
         botaoSalvar.addActionListener(e -> {
             try {
-                compromissoAtual.setNomeCliente(campoNomeCliente.getText());
-                compromissoAtual.setTelefone(campoTelefone.getText());
-                compromissoAtual.setHora(LocalTime.parse(campoHora.getText()));
-                compromissoAtual.setDescricao(areaDescricao.getText());
+            	
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                String nomeCliente = campoNomeCliente.getText().trim();
+                String telefone = campoTelefone.getText().trim();
+                String dataString = campoData.getText().trim();
+                String horaString = campoHora.getText().trim();
+                String descricao = areaDescricao.getText().trim();
 
+                LocalDate data = LocalDate.parse(dataString, dateFormatter);
+                LocalTime hora = LocalTime.parse(horaString, timeFormatter);
+                LocalDateTime compromissoDateTime = LocalDateTime.of(data, hora);
+
+                if (compromissoDateTime.isBefore(LocalDateTime.now())) {
+                    JOptionPane.showMessageDialog(this, "Não é possível agendar compromissos para datas passadas.", "Erro de Agendamento", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                System.out.println(compromissoAtual);
+                
+                compromissoAtual.setNomeCliente(nomeCliente);
+                compromissoAtual.setTelefone(telefone);
+                compromissoAtual.setData(data);
+                compromissoAtual.setHora(hora);
+                compromissoAtual.setDescricao(descricao);
+                
                 telaPrincipal.atualizarListaCompromissos();
-
                 setVisible(false);
                 dispose();
-            } catch (Exception ex) {
+            } catch (DateTimeParseException ex) {
                 JOptionPane.showMessageDialog(this, "Erro ao salvar o compromisso. Verifique os dados e tente novamente.\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar o compromisso: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 

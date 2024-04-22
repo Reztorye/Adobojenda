@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +51,7 @@ public class TelaPrincipal extends JFrame {
         this.listaCompromissos = listaCompromissos;
         setSize(940, 420);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         getContentPane().setLayout(null);
         
         JMenuBar menuBar = new JMenuBar();
@@ -62,26 +64,26 @@ public class TelaPrincipal extends JFrame {
 
         JMenu menuTasks = new JMenu("Tarefas");
         
-        JMenuItem menuItemA = new JMenuItem("Item A");
+        JMenuItem menuItemA = new JMenuItem("Item A - Gestão de Atendimentos Executados");
         menuItemA.addActionListener(e -> listaCompromissos.separarCompromissosExecutados());
         menuTasks.add(menuItemA);
         
-        JMenuItem menuItemB = new JMenuItem("Item B");
+        JMenuItem menuItemB = new JMenuItem("Item B - Organização Flexível de Compromissos");
         menuItemB.addActionListener(e -> listaCompromissos.apresentarDequeCompromissos());
         menuTasks.add(menuItemB);
         
-        JMenuItem menuItemC = new JMenuItem("Item C");
+        JMenuItem menuItemC = new JMenuItem("Item C - Catálogo de Clientes");
         menuItemC.addActionListener(e ->  {
             Set<Compromisso> listaTelefonica = listaCompromissos.criarListaTelefonica();
             mostrarListaTelefonica(listaTelefonica);
         });
         menuTasks.add(menuItemC);
         
-        JMenuItem menuItemD = new JMenuItem("Item D");
+        JMenuItem menuItemD = new JMenuItem("Item D - Registro de Atendimentos por Cliente");
         menuItemD.addActionListener(e -> abrirDialogoItemD());
         menuTasks.add(menuItemD);
         
-        JMenuItem menuItemE = new JMenuItem("Item E");
+        JMenuItem menuItemE = new JMenuItem("Item E - Agenda Diária Ordenada");
         menuItemE.addActionListener(e -> abrirDialogoItemE());
         menuTasks.add(menuItemE);   
            
@@ -136,6 +138,11 @@ public class TelaPrincipal extends JFrame {
         listaCompromissos.inserir(new Compromisso("Paulo Henrique", "(11)95555-4444", LocalDate.of(2024, 4, 28), LocalTime.of(13, 0), "Acompanhamento de Projeto"));
         listaCompromissos.inserir(new Compromisso("Sandra Gomes", "(85)94444-3333", LocalDate.of(2024, 5, 12), LocalTime.of(17, 45), "Feedback do Cliente"));
         listaCompromissos.inserir(new Compromisso("Tiago Nunes", "(11)93333-2222", LocalDate.of(2024, 4, 30), LocalTime.of(12, 15), "Alinhamento Estratégico"));
+        listaCompromissos.inserir(new Compromisso("Ana Beatriz", "(21)98765-4321", LocalDate.now(), LocalTime.of(10, 30), "Consulta 1"));
+        listaCompromissos.inserir(new Compromisso("Carlos Souza", "(11)92345-6789", LocalDate.now(), LocalTime.of(11, 0), "Reunião 1"));
+        listaCompromissos.inserir(new Compromisso("Ana Beatriz", "(21)98765-4321", LocalDate.now(), LocalTime.of(12, 30), "Consulta 2"));
+        listaCompromissos.inserir(new Compromisso("Diego Martins", "(85)91234-5678", LocalDate.now(), LocalTime.of(14, 15), "Discussão de Contrato"));
+        listaCompromissos.inserir(new Compromisso("Eva Mendes", "(31)97777-6666", LocalDate.now(), LocalTime.of(16, 0), "Auditoria Interna"));
 
         atualizarListaCompromissos();
         
@@ -167,6 +174,7 @@ public class TelaPrincipal extends JFrame {
                         Compromisso compromissoSelecionado = listaCompromissos.findCompromissoById(compromissoId);
                         if (compromissoSelecionado != null) {
                         	FormularioEditar formularioEdicao = new FormularioEditar(TelaPrincipal.this, listaCompromissos, TelaPrincipal.this, compromissoSelecionado);
+                        	System.out.println("TESTEEEEEEEE: " + formularioEdicao.hashCode());
                             formularioEdicao.setVisible(true);
                         } else {
                             JOptionPane.showMessageDialog(TelaPrincipal.this, "Compromisso não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -220,7 +228,6 @@ public class TelaPrincipal extends JFrame {
                 int selectedRow = tabelaCompromissos.getSelectedRow();
                 if (selectedRow >= 0) {
                     int compromissoId = (Integer) modelo.getValueAt(selectedRow, 0);
-                    
                     int confirm = JOptionPane.showConfirmDialog(
                             TelaPrincipal.this,
                             "Deseja marcar o compromisso como executado?",
@@ -228,7 +235,9 @@ public class TelaPrincipal extends JFrame {
                             JOptionPane.YES_NO_OPTION);
 
                     if (confirm == JOptionPane.YES_OPTION) {
-                        listaCompromissos.confirmarAtendimentoPeloId(compromissoId);  
+                        Compromisso compromisso = listaCompromissos.findCompromissoById(compromissoId);
+                        compromisso.setExecutado(true);
+                        compromisso.setHoraExecutado(LocalDateTime.now()); 
                         atualizarListaCompromissos();  
                     }
                 } else {
@@ -272,7 +281,7 @@ public class TelaPrincipal extends JFrame {
                             compromisso.getTelefone().contains(termoPesquisa) ||
                             compromisso.getData().toString().contains(termoPesquisa) ||
                             compromisso.getHora().toString().contains(termoPesquisa) ||
-                            compromisso.getDescricao().toLowerCase().contains(termoPesquisa)) {
+                            compromisso.getDescricao().toLowerCase().contains(termoPesquisa)){
                             compromissosFiltrados.add(compromisso);
                         }
                     }
@@ -382,7 +391,7 @@ public class TelaPrincipal extends JFrame {
         }
     }
 
-    
+    // Método Auxiliar do item B
     private void mostrarListaTelefonica(Set<Compromisso> listaTelefonica) {
         JDialog dialogoLista = new JDialog();
         dialogoLista.setTitle("Lista Telefônica");
@@ -391,8 +400,7 @@ public class TelaPrincipal extends JFrame {
         StringBuilder relatorio = new StringBuilder("Lista Telefônica:\n");
 
         for (Compromisso compromisso : listaTelefonica) {
-            relatorio.append("ID: ").append(compromisso.getId())
-                     .append(", Nome: ").append(compromisso.getNomeCliente())
+            relatorio.append("Nome: ").append(compromisso.getNomeCliente())
                      .append(", Telefone: ").append(compromisso.getTelefone())
                      .append("\n");
         }
